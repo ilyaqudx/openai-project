@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    #game {
+      border: 1px solid black;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="game" width="300" height="600"></canvas>
+  <p id="score">分数：0</p>
+  <script>
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const blockSize = 30;
+const gameWidth = 10;
+const gameHeight = 20;
+const shapes = [  [[1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+  [[1, 1, 1, 0], [0, 1, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+  [[1, 1, 0, 0], [0, 1, 1, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+  [[0, 1, 1, 0], [1, 1, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+  [[1, 0, 0, 0], [1, 1, 1, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+  [[0, 0, 1, 0], [1, 1, 1, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+  [[0, 1, 0, 0], [1, 1, 1, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+  [[1, 1, 0, 0], [1, 1, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
+];
+const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'cyan', 'orange'];
+let gameMatrix = [];
+for (let i = 0; i < gameHeight; i++) {
+  gameMatrix[i] = [];
+  for (let j = 0; j < gameWidth; j++) {
+    gameMatrix[i][j] = 0;
+  }
+}
+let currentShape = shapes[Math.floor(Math.random() * shapes.length)];
+let currentColor = colors[Math.floor(Math.random() * colors.length)];
+let currentX = gameWidth / 2 - currentShape[0].length / 2;
+let currentY = 0;
+
+// 检查是否可以向下移动
+function checkCanMoveDown() {
+  for (let i = 0; i < currentShape.length; i++) {
+    for (let j = 0; j < currentShape[i].length; j++) {
+      if (currentShape[i][j] !== 0) {
+        if (currentY + i + 1 >= gameHeight || gameMatrix[currentY + i + 1][currentX + j] !== 0) {
+          return false;
+        }
+      }
+    }
+  }
+  return true;
+}
+
+// 检查是否可以向左移动
+function checkCanMoveLeft() {
+for (let i = 0; i < currentShape.length; i++) {
+for (let j = 0; j < currentShape[i].length; j++) {
+if (currentShape[i][j] !== 0) {
+if (currentX + j - 1 < 0 || gameMatrix[currentY + i][currentX + j - 1] !== 0) {
+return false;
+}
+}
+}
+}
+return true;
+}
+
+// 检查是否可以向右移动
+function checkCanMoveRight() {
+for (let i = 0; i < currentShape.length; i++) {
+for (let j = 0; j < currentShape[i].length; j++) {
+if (currentShape[i][j] !== 0) {
+if (currentX + j + 1 >= gameWidth || gameMatrix[currentY + i][currentX + j + 1] !== 0) {
+return false;
+}
+}
+}
+}
+return true;
+}
+
+// 向下移动
+function moveDown() {
+currentY++;
+}
+
+// 向左移动
+function moveLeft() {
+currentX--;
+}
+
+// 向右移动
+function moveRight() {
+currentX++;
+}
+
+// 旋转当前方块
+function rotate() {
+  let newShape = [];
+  for (let i = 0; i < currentShape.length; i++) {
+    newShape[i] = [];
+    for (let j = 0; j < currentShape[i].length; j++) {
+      newShape[i][j] = currentShape[currentShape.length - j - 1][i];
+    }
+  }
+  return newShape;
+}
+
+// 检查是否可以旋转
+function checkCanRotate(newShape) {
+  for (let i = 0; i < newShape.length; i++) {
+    for (let j = 0; j < newShape[i].length; j++) {
+      if (newShape[i][j] !== 0) {
+        if (currentX + j < 0 || currentX + j >= gameWidth || currentY + i >= gameHeight || gameMatrix[currentY + i][currentX + j] !== 0) {
+          return false;
+        }
+      }
+    }
+  }
+  return true;
+}
+
+
+
+// 将当前方块加入游戏矩阵
+function addCurrentShapeToMatrix() {
+for (let i = 0; i < currentShape.length; i++) {
+for (let j = 0; j < currentShape[i].length; j++) {
+if (currentShape[i][j] !== 0) {
+gameMatrix[currentY + i][currentX + j] = currentShape[i][j];
+}
+}
+}
+}
+
+// 移除完整的行
+function removeCompleteLines() {
+  // 存储完整的行的编号
+  let lines = [];
+  // 遍历游戏矩阵的每一行
+  for (let i = 0; i < gameHeight; i++) {
+    // 记录当前行是否完整
+    let line = true;
+    // 遍历当前行的每一个方块
+    for (let j = 0; j < gameWidth; j++) {
+      // 如果当前方块为空，说明当前行不完整
+      if (gameMatrix[i][j] === 0) {
+        line = false;
+        // 跳出循环
+        break;
+      }
+    }
+    // 如果当前行完整
+    if (line) {
+      // 将当前行的编号存入数组
+      lines.push(i);
+      // 遍历当前行之上的所有行
+      for (let k = i; k > 0; k--) {
+        // 将上一行的方块复制到当前行
+        gameMatrix[k] = gameMatrix[k - 1].slice();
+      }
+      // 将第一行初始化为全 0 的数组
+      gameMatrix[0] = [];
+      for (let j = 0; j < gameWidth; j++) {
+        gameMatrix[0][j] = 0;
+      }
+    }
+  }
+  // 返回完整的行的编号
+  return lines;
+}
+
+// 渲染游戏界面
+const shadowWidth = 2;
+function render() {
+ctx.clearRect(0, 0, canvas.width, canvas.height);
+for (let i = 0; i < gameHeight; i++) {
+for (let j = 0; j < gameWidth; j++) {
+if (
+gameMatrix[i][j] !== 0) {
+ctx.fillStyle = colors[gameMatrix[i][j] - 1];
+ctx.fillRect(j * blockSize + shadowWidth, i * blockSize + shadowWidth, blockSize - 2 * shadowWidth, blockSize - 2 * shadowWidth);
+  ctx.strokeRect(j * blockSize, i * blockSize, blockSize, blockSize);
+}
+}
+}
+for (let i = 0; i < currentShape.length; i++) {
+for (let j = 0; j < currentShape[i].length; j++) {
+if (currentShape[i][j] !== 0) {
+ctx.fillStyle = currentColor;
+ctx.fillRect((currentX + j) * blockSize + shadowWidth, (currentY + i) * blockSize + shadowWidth, blockSize - 2 * shadowWidth, blockSize - 2 * shadowWidth);
+ctx.strokeRect((currentX + j) * blockSize, (currentY + i) * blockSize, blockSize, blockSize);
+
+}
+}
+}
+}
+
+// 监听键盘事件
+document.onkeydown = function(event) {
+if (event.keyCode === 37 && checkCanMoveLeft()) {
+moveLeft();
+} else if (event.keyCode === 38) {
+// 旋转代码
+let rotatedShape = rotate();
+    if (checkCanRotate(rotatedShape)) {
+      currentShape = rotatedShape;
+    }
+} else if (event.keyCode === 39 && checkCanMoveRight()) {
+moveRight();
+} else if (event.keyCode === 40 && checkCanMoveDown()) {
+moveDown();
+}
+render();
+};
+
+let currentTime = 0;
+let dropInterval = 1000;
+let score = 0;
+
+// 游戏循环
+function gameLoop(timestamp) {
+if (currentTime === 0) {
+currentTime = timestamp;
+}
+if (timestamp - currentTime > dropInterval) {
+currentTime = timestamp;
+if (checkCanMoveDown()) {
+moveDown();
+} else {
+addCurrentShapeToMatrix();
+const lines = removeCompleteLines();
+console.log("当前消除行数:" , lines.length)
+if(lines.length > 0){
+score += lines.length;
+document.getElementById("score").innerHTML = "分数：" + score;
+}
+currentShape = shapes[Math.floor(Math.random() * shapes.length)];
+currentColor = colors[Math.floor(Math.random() * colors.length)];
+currentX = gameWidth / 2 - currentShape[0].length / 2;
+currentY = 0;
+}
+}
+render();
+requestAnimationFrame(gameLoop);
+}
+
+requestAnimationFrame(gameLoop);
+</script>
+
+</body>
+</html>
