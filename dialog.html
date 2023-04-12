@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>HTML弹窗示例</title>
+    <style>
+      /* 遮罩层样式 */
+      .overlay {
+        /* 设置全屏显示 */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        /* 设置背景颜色和透明度 */
+        background-color: rgba(0, 0, 0, 0.5);
+        /* 设置z-index值确保遮罩层在其他元素之上 */
+        z-index: 9999;
+      }
+      /* 弹窗样式 */
+      .modal {
+        /* 设置弹窗在屏幕中央显示 */
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        /* 设置弹窗宽度和高度 */
+        width: 400px;
+        height: 300px;
+        /* 设置弹窗背景颜色和圆角 */
+        background-color: #ffffff;
+        border-radius: 10px;
+        /* 设置弹窗的偏移量使其在屏幕中央 */
+        margin-top: -150px;
+        margin-left: -200px;
+        /* 设置z-index确保弹窗在遮罩层之上 */
+        z-index: 10000;
+      }
+      /* 弹窗内容样式 */
+      .modal-content {
+        /* 设置弹窗内容居中 */
+        text-align: center;
+        /* 设置弹窗内容的位置 */
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        /* 设置弹窗内容的偏移量 */
+        transform: translate(-50%, -50%);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 遮罩层 -->
+    <div class="overlay"></div>
+    <!-- 弹窗 -->
+    <div class="modal">
+      <!-- 弹窗内容 -->
+      <div class="modal-content">
+        <!-- 在这里放置弹窗内容 -->
+        <h1>Hello, World!</h1>
+        <p>This is a modal dialog box.</p>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>微信聊天页面</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">小王和小李的聊天</div>
+    <div class="chat-content" id="chatContent">
+      <!-- 聊天内容将通过JavaScript动态添加 -->
+    </div>
+    <div class="chat-input-container" id="chatInputContainer">
+	  <input type="text" class="chat-input" id="chatInput" placeholder="请输入消息">
+	  <button class="chat-send-btn" id="chatSendBtn">发送</button>
+	  <button class="chat-add-btn" id="chatAddBtn">+</button>
+	</div>
+
+  </div>
+  <script src="script.js"></script>
+</body>
+<style>
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background-color: #f0f0f0;
+}
+
+.chat-container {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  background-color: white;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.chat-content {
+  min-height: 100%;
+  max-height: 100%;
+}
+
+
+.chat-header {
+  padding: 10px;
+  background-color: #1aad19;
+  color: white;
+  font-weight: bold;
+  text-align: center;
+}
+
+.chat-message {
+  margin-bottom: 10px;
+}
+
+.chat-input-container {
+  padding: 10px;
+  display: flex;
+  border-top: 1px solid #eee;
+}
+
+.chat-input {
+  flex: 1;
+  padding: 5px;
+  border: 1px solid #eee;
+  border-radius: 5px;
+}
+
+
+.chat-send-btn {
+  margin-left: 10px;
+  padding: 5px 10px;
+  background-color: #1aad19;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.chat-message {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.user-message {
+  flex-direction: row-reverse;
+}
+
+.avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  margin: 0 10px;
+}
+
+.user-message span {
+  background-color: #1aad19;
+  color: white;
+  border-radius: 5px 5px 0 5px;
+}
+
+.bot-message span {
+  background-color: #f1f1f1;
+  color: #333;
+  border-radius: 5px 5px 5px 0;
+}
+
+span {
+  padding: 5px 10px;
+  display: inline-block;
+  max-width: 70%;
+  word-wrap: break-word;
+}
+
+
+.user-message {
+  color: #1aad19;
+  text-align: right;
+}
+
+.bot-message {
+  color: #333;
+}
+
+.chat-content::-webkit-scrollbar {
+  width: 0;
+  background-color: transparent;
+}
+
+.message-timestamp {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 5px;
+}
+
+.chat-add-btn {
+  margin-left: 10px;
+  padding: 5px 10px;
+  background-color: #1aad19;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  background-image: url('path/to/add-icon.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+.chat-add-btn:hover {
+  background-color: #148b12;
+}
+
+.menu {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: white;
+  box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.2);
+  display: none;
+  z-index: 1;
+}
+
+.menu-item {
+  width: 25%;
+  display: inline-block;
+  text-align: center;
+}
+
+
+.menu-item:last-child {
+  border-bottom: 1px solid #eee;
+}
+
+.menu-item:hover {
+  background-color: #f0f0f0;
+}
+
+
+</style>
+<script>
+
+
+
+const chatContent = document.getElementById('chatContent');
+const chatSendBtn = document.getElementById('chatSendBtn');
+const chatInput = document.getElementById('chatInput');
+
+const autoReplies = [
+  '哈哈，太有趣了！',
+  '我明白了。',
+  '嗯，这个观点很有道理。',
+  '可以再详细解释一下吗？',
+  '我同意你的看法。',
+  '非常感谢你的分享！'
+];
+
+chatSendBtn.addEventListener('click', sendMessage);
+chatInput.addEventListener('keydown', function(event) {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    sendMessage();
+  }
+});
+
+function sendMessage() {
+  const message = chatInput.value.trim();
+
+  if (message) {
+    const timestamp = new Date();
+    const minutesSinceLastMessage = getMinutesSinceLastMessage();
+    let shouldShowTimestamp = false;
+
+    if (!lastMessageTimestamp) {
+      shouldShowTimestamp = true;
+    } else if (minutesSinceLastMessage >= 3) {
+      shouldShowTimestamp = true;
+    }
+
+    addMessage(message, 'user', 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50', shouldShowTimestamp, timestamp);
+    chatInput.value = '';
+
+    setTimeout(() => {
+      const randomReply = autoReplies[Math.floor(Math.random() * autoReplies.length)];
+      addMessage(randomReply, 'bot', 'https://www.gravatar.com/avatar/c9c33a8c4aee0b08f8c5b2ebcf3bcc1f', false, timestamp);
+    }, 1000);
+  }
+}
+
+function addMessage(message, sender, avatarUrl, showTimestamp, timestamp) {
+  const messageContainer = document.createElement('div');
+  messageContainer.classList.add('chat-message');
+  messageContainer.classList.add(sender === 'user' ? 'user-message' : 'bot-message');
+
+  if (showTimestamp) {
+    const time = document.createElement('div');
+    time.classList.add('message-timestamp');
+    time.textContent = formatTimestamp(timestamp);
+    messageContainer.appendChild(time);
+  }
+
+  const avatar = document.createElement('img');
+  avatar.classList.add('avatar');
+  avatar.src = avatarUrl;
+  messageContainer.appendChild(avatar);
+
+  const text = document.createElement('span');
+  text.textContent = message;
+  messageContainer.appendChild(text);
+
+  chatContent.appendChild(messageContainer);
+  chatContent.scrollTop = chatContent.scrollHeight;
+
+  lastMessageTimestamp = timestamp;
+}
+
+function getMinutesSinceLastMessage() {
+  if (!lastMessageTimestamp) {
+    return Infinity;
+  }
+
+  const now = new Date();
+  const minutes = (now - lastMessageTimestamp) / 1000 / 60;
+  return minutes;
+}
+
+function formatTimestamp(timestamp) {
+  return timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+let lastMessageTimestamp = null;
+
+const chatAddBtn = document.getElementById('chatAddBtn');
+const menu = document.createElement('div');
+menu.classList.add('menu');
+
+const menuItems = [
+  '照片',
+  '拍摄',
+  '位置',
+  '红包'
+];
+
+menuItems.forEach(item => {
+  const menuItem = document.createElement('div');
+  menuItem.classList.add('menu-item');
+  menuItem.textContent = item;
+  menu.appendChild(menuItem);
+});
+
+document.body.appendChild(menu);
+
+const chatInputContainer = document.getElementById('chatInputContainer');
+
+chatAddBtn.addEventListener('click', function() {
+  if (menu.style.display === 'block') {
+    menu.style.display = 'none';
+    chatInputContainer.style.marginTop = '0';
+  } else {
+    menu.style.display = 'block';
+    chatInputContainer.style.marginTop = menu.offsetHeight + 'px';
+  }
+});
+
+
+
+/**
+function sendMessage() {
+  const message = chatInput.value.trim();
+
+  if (message) {
+    addMessage(message, 'user', 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50');
+    chatInput.value = '';
+
+    setTimeout(() => {
+      const randomReply = autoReplies[Math.floor(Math.random() * autoReplies.length)];
+      addMessage(randomReply, 'bot', 'https://www.gravatar.com/avatar/c9c33a8c4aee0b08f8c5b2ebcf3bcc1f');
+    }, 1000);
+  }
+}
+
+function addMessage(message, sender, avatarUrl) {
+  const messageContainer = document.createElement('div');
+  messageContainer.classList.add('chat-message');
+  messageContainer.classList.add(sender === 'user' ? 'user-message' : 'bot-message');
+
+  const avatar = document.createElement('img');
+  avatar.classList.add('avatar');
+  avatar.src = avatarUrl;
+  messageContainer.appendChild(avatar);
+
+  const text = document.createElement('span');
+  text.textContent = message;
+  messageContainer.appendChild(text);
+
+  chatContent.appendChild(messageContainer);
+  chatContent.scrollTop = chatContent.scrollHeight;
+}
+*/
+
+
+
+</script>
+</html>

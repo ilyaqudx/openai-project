@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>教学网站</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <ul>
+        <li class="menu-item active">知识点1</li>
+        <li class="menu-item">知识点2</li>
+        <li class="menu-item">知识点3</li>
+        <li class="menu-item">知识点4</li>
+      </ul>
+    </div>
+    <div class="content">
+      <h2>知识点1</h2>
+      <p>这是知识点1的内容</p>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #f0f0f0;
+}
+
+.container {
+  display: flex;
+  justify-content: flex-start;
+  align-items: stretch;
+  height: 100vh;
+}
+
+.sidebar {
+  flex: 1;
+  background-color: #fff;
+  border-radius: 10px 0 0 10px;
+  padding: 20px;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.menu-item {
+  font-size: 16px;
+  font-weight: bold;
+  margin: 5px 0;
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.menu-item:hover {
+  background-color: #f0f0f0;
+}
+
+.menu-item.active {
+  background-color: #1E9FFF;
+  color: #fff;
+}
+
+.content {
+  flex: 3;
+  background-color: #fff;
+  border-radius: 0 10px 10px 0;
+  padding: 20px;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
+}
+
+h2 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+</style>
+<script>
+const menuItems = document.querySelectorAll('.menu-item');
+const content = document.querySelector('.content');
+
+menuItems.forEach(item => {
+  item.addEventListener('click', () => {
+    // 移除所有菜单项的active状态
+    menuItems.forEach(i => i.classList.remove('active'));
+    // 设置当前菜单项为active状态
+    item.classList.add('active');
+    // 显示对应的内容
+    content.innerHTML = `
+      <h2>${item.innerText}</h2>
+      <p>这是${item.innerText}的内容</p>
+    `;
+  });
+});
+
+</script>
+</html>
